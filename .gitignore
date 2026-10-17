@@ -1,11 +1,30 @@
+# IDE and local machine configuration
 *.iml
+.idea/
+.vscode/
+local.properties
+*.local.properties
+.DS_Store
+Thumbs.db
+
+# Build output, SDK/native caches, diagnostics
 .gradle/
 .kotlin/
-.idea/
-local.properties
 **/build/
 captures/
 .externalNativeBuild/
 .cxx/
+*.apk
+*.aab
+*.apks
+*.hprof
+hs_err_pid*
+
+# Signing credentials (the Gradle Wrapper JAR must stay tracked)
 *.jks
 *.keystore
+keystore.properties
+signing.properties
+.env
+.env.*
+!.env.example

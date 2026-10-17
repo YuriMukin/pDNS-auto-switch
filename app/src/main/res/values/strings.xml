@@ -1,5 +1,35 @@
 <resources>
     <string name="app_name">pDNS Auto Switch</string>
-    <string name="project_description">Автоматическое переключение Private DNS для доверенных сетей Wi-Fi.</string>
-    <string name="project_status">Проект готов к разработке. Следующий этап — ручное переключение DNS и плитка быстрых настроек.</string>
+    <string name="screen_description">Ручное управление Private DNS. Состояние считывается из настроек Android.</string>
+    <string name="tile_label">Smart DNS</string>
+    <string name="tile_description">Smart DNS: %1$s</string>
+    <string name="state_on">Включён</string>
+    <string name="state_off">Выключен</string>
+    <string name="state_automatic">Автоматически (Android)</string>
+    <string name="state_unknown">Неизвестно</string>
+    <string name="tile_setup">Нужна настройка</string>
+    <string name="tile_provider">Укажите провайдера</string>
+    <string name="current_state">Private DNS: %1$s</string>
+    <string name="provider_value">Провайдер: %1$s</string>
+    <string name="not_configured">не указан</string>
+    <string name="turn_on">Включить Smart DNS</string>
+    <string name="turn_off">Выключить Smart DNS</string>
+    <string name="permission_granted">✓ Разрешение на изменение DNS выдано</string>
+    <string name="permission_required">Требуется разрешение на изменение DNS</string>
+    <string name="permission_help">Подключите телефон к ПК с включённой USB-отладкой и выполните команду ниже один раз. После этого откройте приложение снова. Root не требуется.</string>
+    <string name="provider_help">В настройках Android откройте «Сеть и интернет» → «Персональный DNS». Выберите имя хоста провайдера, укажите свой сервер и сохраните. Приложение сохраняет этот адрес при выключении DNS.</string>
+    <string name="ready_help">Всё готово. Кнопка и плитка переключают выбранного провайдера ↔ выключено. Режим «Автоматически» означает режим Android, а не автоматику приложения.</string>
+    <string name="read_failed">Не удалось прочитать настройки Private DNS.</string>
+    <string name="write_failed">Android не подтвердил изменение Private DNS. Проверьте разрешение и настройки устройства.</string>
+    <string name="copy_command">Скопировать команду ADB</string>
+    <string name="adb_command_label">Команда выдачи разрешения</string>
+    <string name="open_settings">Настройки сети и DNS</string>
+    <string name="add_tile">Добавить плитку в шторку</string>
+    <string name="tile_help">Нажатие плитки переключает DNS, долгое нажатие открывает этот экран. На заблокированном телефоне потребуется разблокировка.</string>
+    <string name="tile_added">Плитка добавлена</string>
+    <string name="tile_already_added">Плитка уже добавлена</string>
+    <string name="tile_not_added">Добавление отменено. Плитку можно добавить через редактирование шторки.</string>
+    <string name="tile_add_failed">Добавьте Smart DNS вручную через редактирование шторки.</string>
+    <string name="settings_unavailable">Откройте Private DNS через системное приложение «Настройки».</string>
+    <string name="state_note">«Включён» означает выбранный режим провайдера. Доступность DNS-сервера здесь не проверяется.</string>
 </resources>

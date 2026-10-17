@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">pDNS Auto Switch</string>
+    <string name="project_description">Автоматическое переключение Private DNS для доверенных сетей Wi-Fi.</string>
+    <string name="project_status">Проект готов к разработке. Следующий этап — ручное переключение DNS и плитка быстрых настроек.</string>
+</resources>

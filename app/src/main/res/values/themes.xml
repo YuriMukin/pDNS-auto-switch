@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.PdnsAutoSwitch" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#246BCE</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">#F7F9FC</item>
+    </style>
+</resources>

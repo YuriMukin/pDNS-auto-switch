@@ -1,7 +1,8 @@
 package io.github.sorjo.pdnsautoswitch
 
-import android.app.Activity
+import androidx.appcompat.app.AppCompatActivity
 import android.app.StatusBarManager
+import com.google.android.material.button.MaterialButton
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -15,16 +16,21 @@ import android.view.WindowInsets
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.color.DynamicColors
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
+    private var setupExpanded: Boolean? = null
+    private var setupRequired = false
     private val controller by lazy { DnsController(AndroidDnsSettings(this)) }
     private val observer by lazy { DnsSettingsObserver(this) { refresh() } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setupExpanded = savedInstanceState?.getBoolean("setup_expanded")
         val content = findViewById<View>(R.id.main_content)
-        val padding = (24 * resources.displayMetrics.density).toInt()
+        val padding = (20 * resources.displayMetrics.density).toInt()
         content.setOnApplyWindowInsetsListener { view, insets ->
             val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
             view.setPadding(padding + bars.left, padding + bars.top, padding + bars.right, padding + bars.bottom)
@@ -50,6 +56,19 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.open_settings).setOnClickListener { openDnsSettings() }
         findViewById<Button>(R.id.add_tile).setOnClickListener { addTile() }
         findViewById<TextView>(R.id.adb_command).text = grantCommand()
+        findViewById<Button>(R.id.expand_setup).setOnClickListener {
+            setupExpanded = !(setupExpanded ?: setupRequired)
+            updateSetupVisibility()
+        }
+        val appearance = getSharedPreferences(DnsApplication.APPEARANCE, MODE_PRIVATE)
+        findViewById<MaterialSwitch>(R.id.dynamic_color).apply {
+            isChecked = appearance.getBoolean(DnsApplication.DYNAMIC_COLOR, true)
+            isEnabled = DynamicColors.isDynamicColorAvailable()
+            setOnCheckedChangeListener { _, enabled ->
+                appearance.edit().putBoolean(DnsApplication.DYNAMIC_COLOR, enabled).apply()
+                recreate()
+            }
+        }
     }
 
     override fun onResume() {
@@ -71,10 +90,8 @@ class MainActivity : Activity() {
             DnsController.Mode.AUTOMATIC -> R.string.state_automatic
             DnsController.Mode.UNKNOWN -> R.string.state_unknown
         })
-        findViewById<TextView>(R.id.dns_state).text = getString(R.string.current_state, modeText)
-        findViewById<TextView>(R.id.provider).text = getString(
-            R.string.provider_value, state.provider.ifBlank { getString(R.string.not_configured) }
-        )
+        findViewById<TextView>(R.id.dns_state).text = modeText
+        findViewById<TextView>(R.id.provider).text = state.provider.ifBlank { getString(R.string.provider_empty) }
         findViewById<TextView>(R.id.permission_status).setText(
             if (state.canWrite) R.string.permission_granted else R.string.permission_required
         )
@@ -85,10 +102,34 @@ class MainActivity : Activity() {
             else -> getString(R.string.ready_help)
         }
         findViewById<TextView>(R.id.setup_help).text = help
+        val commandVisibility = if (state.canWrite) View.GONE else View.VISIBLE
+        findViewById<View>(R.id.adb_command).visibility = commandVisibility
+        findViewById<View>(R.id.copy_command).visibility = commandVisibility
+        setupRequired = !state.readable || !state.canWrite || state.provider.isBlank()
+        updateSetupVisibility()
         findViewById<Button>(R.id.toggle_dns).apply {
             isEnabled = state.readable && state.canWrite &&
                 (state.mode == DnsController.Mode.HOSTNAME || state.provider.isNotBlank())
             setText(if (state.mode == DnsController.Mode.HOSTNAME) R.string.turn_off else R.string.turn_on)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("setup_expanded", setupExpanded ?: setupRequired)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun updateSetupVisibility() {
+        val expanded = setupExpanded ?: setupRequired
+        findViewById<View>(R.id.setup_card).visibility = if (expanded) View.VISIBLE else View.GONE
+        findViewById<MaterialButton>(R.id.expand_setup).apply {
+            setText(when {
+                setupRequired && !expanded -> R.string.setup_needed
+                expanded -> R.string.setup_collapse
+                else -> R.string.setup_done
+            })
+            setIconResource(if (expanded) R.drawable.ic_collapse else R.drawable.ic_expand)
+            contentDescription = getString(if (expanded) R.string.setup_collapse else R.string.setup_title)
         }
     }
 

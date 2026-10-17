@@ -10,8 +10,8 @@ android {
         applicationId = "io.github.sorjo.pdnsautoswitch"
         minSdk = 33
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     buildTypes {
@@ -35,5 +35,6 @@ kotlin {
 
 
 dependencies {
+    implementation("com.google.android.material:material:1.13.0")
     testImplementation("junit:junit:4.13.2")
 }

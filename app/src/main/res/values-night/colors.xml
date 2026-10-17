@@ -1,0 +1,14 @@
+<resources>
+    <color name="pdns_primary">#80D5C3</color>
+    <color name="pdns_on_primary">#00382F</color>
+    <color name="pdns_primary_container">#005045</color>
+    <color name="pdns_on_primary_container">#9EF2DF</color>
+    <color name="pdns_secondary_container">#354C44</color>
+    <color name="pdns_surface">#101512</color>
+    <color name="pdns_card">#1A211D</color>
+    <color name="pdns_on_surface">#E0E9E2</color>
+    <color name="pdns_on_surface_variant">#BECBC4</color>
+    <color name="pdns_outline">#89978F</color>
+    <color name="pdns_outline_variant">#3F4A44</color>
+    <bool name="light_system_bars">false</bool>
+</resources>

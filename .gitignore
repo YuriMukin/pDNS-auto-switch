@@ -28,3 +28,7 @@ signing.properties
 .env
 .env.*
 !.env.example
+
+#AI agents data
+AGENTS.md
+ROADMAP.md

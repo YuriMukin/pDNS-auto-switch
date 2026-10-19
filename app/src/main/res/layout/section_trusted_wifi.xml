@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Pdns.Card" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:layout_marginTop="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/wifi_title" android:textAppearance="@style/Text.Pdns.Title" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/wifi_intro" android:textAppearance="@style/Text.Pdns.Body" />
+        <LinearLayout android:id="@+id/trusted_wifi_list" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="8dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/wifi_loading" android:textAppearance="@style/Text.Pdns.Body" />
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/check_wifi"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" android:minHeight="56dp" android:textAllCaps="false"
+            android:text="@string/wifi_check" />
+        <TextView android:id="@+id/wifi_status" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/wifi_idle" android:textAppearance="@style/Text.Pdns.Body"
+            android:accessibilityLiveRegion="polite" />
+        <LinearLayout android:id="@+id/wifi_results" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/wifi_settings"
+            style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp" android:textAllCaps="false"
+            android:text="@string/wifi_open_app_settings" android:visibility="gone" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

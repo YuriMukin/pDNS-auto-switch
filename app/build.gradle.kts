@@ -1,3 +1,4 @@
+import com.android.build.api.artifact.SingleArtifact
 import java.util.Properties
 
 plugins {
@@ -24,8 +25,8 @@ android {
         applicationId = "io.github.sorjo.pdnsautoswitch"
         minSdk = 33
         targetSdk = 37
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
     }
 
     signingConfigs {
@@ -69,6 +70,24 @@ kotlin {
 
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
     implementation("com.google.android.material:material:1.13.0")
     testImplementation("junit:junit:4.13.2")
+}
+
+// Export the signed APK with a versioned distribution name using the public artifact API.
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        val apkName = variant.outputs.single().versionName.map { "pdns-auto-switch-$it.apk" }
+        val exportApk = tasks.register<Copy>("exportReleaseApk") {
+            from(variant.artifacts.get(SingleArtifact.APK)) {
+                include("*.apk")
+                rename { apkName.get() }
+            }
+            into(layout.buildDirectory.dir("release"))
+        }
+        tasks.matching { it.name == "assembleRelease" }.configureEach {
+            dependsOn(exportApk)
+        }
+    }
 }

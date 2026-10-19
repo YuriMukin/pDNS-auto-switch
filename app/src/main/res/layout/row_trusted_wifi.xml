@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="horizontal" android:gravity="center_vertical">
+    <TextView android:id="@+id/trusted_ssid" android:layout_width="0dp"
+        android:layout_weight="1" android:layout_height="wrap_content"
+        android:paddingTop="8dp" android:paddingBottom="8dp"
+        android:textAppearance="@style/Text.Pdns.Body" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/remove_trusted_wifi"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:minHeight="48dp" android:textAllCaps="false" android:text="@string/wifi_remove" />
+</LinearLayout>

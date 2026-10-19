@@ -43,6 +43,8 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <include layout="@layout/section_trusted_wifi" />
+
         <com.google.android.material.card.MaterialCardView style="@style/Widget.Pdns.Card"
             android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

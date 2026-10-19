@@ -2,10 +2,12 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" path="." />
+        <exclude domain="file" path="datastore/" />
         <exclude domain="device_root" path="." />
     </cloud-backup>
     <device-transfer>
         <exclude domain="root" path="." />
+        <exclude domain="file" path="datastore/" />
         <exclude domain="device_root" path="." />
     </device-transfer>
 </data-extraction-rules>

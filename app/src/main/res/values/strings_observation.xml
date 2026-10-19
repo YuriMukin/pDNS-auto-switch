@@ -1,0 +1,23 @@
+<resources>
+    <string name="observation_title">Наблюдение за сетью</string>
+    <string name="observation_hint">Сервис следит за событиями сети и записывает рекомендации. DNS не меняется. Для чтения имён Wi-Fi предоставьте точную геопозицию через проверку сети.</string>
+    <string name="observation_start">Запустить</string>
+    <string name="observation_stop">Остановить</string>
+    <string name="observation_starting">Запускаем наблюдение…</string>
+    <string name="observation_running">Наблюдение работает · DNS не меняется</string>
+    <string name="observation_stopped">Наблюдение остановлено</string>
+    <string name="observation_start_failed">Не удалось запустить наблюдение. Подробности в журнале.</string>
+    <string name="observation_empty">Событий пока нет.</string>
+    <string name="observation_view_log">Открыть журнал</string>
+    <string name="observation_log_title">Журнал наблюдения</string>
+    <string name="observation_copy">Копировать</string>
+    <string name="observation_close">Закрыть</string>
+    <string name="observation_clear">Очистить</string>
+    <string name="observation_clear_title">Очистить журнал?</string>
+    <string name="observation_clear_message">Будут удалены только записи журнала. Наблюдение и список доверенных сетей не изменятся.</string>
+    <string name="observation_storage_error">Не удалось прочитать или сохранить журнал.</string>
+    <string name="observation_legend">OFF — рекомендовано выключить DNS. HOSTNAME — включить провайдера. BLOCKED — провайдер не настроен или недоступен. Хранятся последние 200 записей без имён Wi-Fi.</string>
+    <string name="observation_channel">Наблюдение за сетью</string>
+    <string name="observation_notification_title">pDNS наблюдает за сетью</string>
+    <string name="observation_notification_body">Только журнал рекомендаций. DNS не меняется.</string>
+</resources>

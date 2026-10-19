@@ -7,6 +7,7 @@ import com.google.android.material.color.DynamicColorsOptions
 class DnsApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        registerActivityLifecycleCallbacks(ObservationPresence)
         DynamicColors.applyToActivitiesIfAvailable(
             this,
             DynamicColorsOptions.Builder().setPrecondition { _, _ ->

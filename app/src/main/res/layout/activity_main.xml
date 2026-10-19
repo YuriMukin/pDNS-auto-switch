@@ -43,6 +43,8 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <include layout="@layout/section_observation" />
+
         <include layout="@layout/section_trusted_wifi" />
 
         <com.google.android.material.card.MaterialCardView style="@style/Widget.Pdns.Card"

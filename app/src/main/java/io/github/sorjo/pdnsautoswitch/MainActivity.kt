@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private var setupExpanded: Boolean? = null
     private var setupRequired = false
     private lateinit var wifiSection: WifiSectionController
+    private lateinit var observationSection: ObservationSectionController
     private val controller by lazy { DnsController(AndroidDnsSettings(this)) }
     private val observer by lazy { DnsSettingsObserver(this) { refresh() } }
 
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
         content.requestApplyInsets()
         wifiSection = WifiSectionController(this)
+        observationSection = ObservationSectionController(this)
         findViewById<Button>(R.id.toggle_dns).setOnClickListener {
             val message = when (controller.toggle()) {
                 DnsController.ToggleResult.SUCCESS -> null
@@ -87,6 +89,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         wifiSection.close()
+        observationSection.close()
         super.onDestroy()
     }
 

@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <application android:name=".DnsApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -36,9 +36,7 @@
             <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE" android:value="true" />
         </service>
         <service android:name=".NetworkObservationService" android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="User-started, event-driven network diagnostics logging Private DNS recommendations without modifying settings." />
+            android:foregroundServiceType="location">
         </service>
     </application>
 </manifest>

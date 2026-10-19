@@ -30,4 +30,29 @@ class ObservationLogTest {
         file.writeText("broken\n" + "x".repeat(5000) + " - WIFI - OFF\n" + "t1 - MOBILE - HOSTNAME\n")
         assertEquals(listOf("t1 - MOBILE - HOSTNAME"), ObservationLog(file).read())
     }
+
+    @Test fun `large default history survives restart and compacts only oldest batch`() {
+        val file = folder.root.resolve("large.log")
+        file.bufferedWriter().use { writer ->
+            for (number in 1..50_010) writer.append("t$number - WIFI - OFF\n")
+        }
+        val log = ObservationLog(file)
+        assertEquals(50_000, log.read().size)
+        assertTrue(log.read().first().startsWith("t11 - "))
+        log.append(ObservationEntry("t50011", "MOBILE", "HOSTNAME"))
+        val restored = ObservationLog(file).read()
+        assertEquals(45_001, restored.size)
+        assertTrue(restored.first().startsWith("t5011 - "))
+        assertTrue(restored.last().startsWith("t50011 - "))
+    }
+
+    @Test fun `append repairs interrupted tail and preserves valid history`() {
+        val file = folder.root.resolve("interrupted.log")
+        file.writeText("t1 - WIFI - OFF\npartial")
+        val log = ObservationLog(file)
+        log.read()
+        log.append(ObservationEntry("t2", "MOBILE", "HOSTNAME"))
+        log.append(ObservationEntry("t3", "MOBILE", "HOSTNAME"))
+        assertEquals(listOf("t1", "t2", "t3"), ObservationLog(file).read().map { it.substringBefore(" - ") })
+    }
 }

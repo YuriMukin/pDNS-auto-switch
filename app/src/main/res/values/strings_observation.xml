@@ -1,23 +1,25 @@
 <resources>
     <string name="observation_title">Наблюдение за сетью</string>
-    <string name="observation_hint">Сервис следит за событиями сети и записывает рекомендации. DNS не меняется. Для чтения имён Wi-Fi предоставьте точную геопозицию через проверку сети.</string>
+    <string name="observation_hint">Сервис следит за сетью, в том числе при закрытом приложении. DNS не меняется. Для чтения имён Wi-Fi нужна точная геопозиция и включённое местоположение.</string>
     <string name="observation_start">Запустить</string>
     <string name="observation_stop">Остановить</string>
     <string name="observation_starting">Запускаем наблюдение…</string>
     <string name="observation_running">Наблюдение работает · DNS не меняется</string>
     <string name="observation_stopped">Наблюдение остановлено</string>
-    <string name="observation_start_failed">Не удалось запустить наблюдение. Подробности в журнале.</string>
-    <string name="observation_empty">Событий пока нет.</string>
-    <string name="observation_view_log">Открыть журнал</string>
-    <string name="observation_log_title">Журнал наблюдения</string>
-    <string name="observation_copy">Копировать</string>
-    <string name="observation_close">Закрыть</string>
-    <string name="observation_clear">Очистить</string>
+    <string name="observation_start_failed">Не удалось запустить наблюдение. Проверьте разрешение на точную геопозицию и включённое местоположение.</string>
+    <string name="observation_logging">Записывать журнал</string>
+    <string name="observation_save">Сохранить журнал в Загрузки</string>
+    <string name="observation_saved">Журнал сохранён в Загрузки: pDNS auto switcher.log. При повторном сохранении Android может добавить номер к имени.</string>
+    <string name="observation_export_failed">Не удалось сохранить файл в Загрузки. Проверьте свободное место и повторите.</string>
+    <string name="observation_clear">Очистить журнал</string>
     <string name="observation_clear_title">Очистить журнал?</string>
-    <string name="observation_clear_message">Будут удалены только записи журнала. Наблюдение и список доверенных сетей не изменятся.</string>
+    <string name="observation_clear_message">Будут удалены записи внутри приложения. Экспортированные файлы, наблюдение и список доверенных сетей не изменятся.</string>
     <string name="observation_storage_error">Не удалось прочитать или сохранить журнал.</string>
-    <string name="observation_legend">OFF — рекомендовано выключить DNS. HOSTNAME — включить провайдера. BLOCKED — провайдер не настроен или недоступен. Хранятся последние 200 записей без имён Wi-Fi.</string>
+    <string name="observation_permission_required">Для наблюдения предоставьте точную геопозицию в разрешениях приложения.</string>
+    <string name="observation_permission_explanation">Android защищает имя Wi-Fi как данные о местоположении. Точная геопозиция нужна для чтения имени сети в работающем сервисе после закрытия экрана приложения. Координаты не запрашиваются и не сохраняются.</string>
+    <string name="observation_location_required">Включите местоположение в Android, затем снова нажмите «Запустить».</string>
+    <string name="observation_legend">До 50 000 записей хранятся между запусками, без имён Wi-Fi. RAW — исходное событие, STABLE — рекомендация после 750 мс без изменений. DNS не переключается.</string>
     <string name="observation_channel">Наблюдение за сетью</string>
     <string name="observation_notification_title">pDNS наблюдает за сетью</string>
-    <string name="observation_notification_body">Только журнал рекомендаций. DNS не меняется.</string>
+    <string name="observation_notification_body">Чтение имени Wi-Fi. DNS не меняется.</string>
 </resources>

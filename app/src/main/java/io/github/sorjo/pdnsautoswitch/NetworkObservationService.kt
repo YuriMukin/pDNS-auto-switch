@@ -23,6 +23,8 @@ import android.os.SystemClock
 import android.provider.Settings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
@@ -40,6 +42,8 @@ class NetworkObservationService : Service() {
     private var receiverRegistered = false
     private var providerObserved = false
     private var failed = false
+    private val recommendationWindow = RecommendationWindow()
+    private var settleJob: Job? = null
 
     private data class Signature(
         val snapshot: NetworkSnapshot,
@@ -61,6 +65,12 @@ class NetworkObservationService : Service() {
     override fun onCreate() {
         super.onCreate()
         try {
+            check(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                "Precise location permission is required before starting observation."
+            }
+            check(getSystemService(LocationManager::class.java).isLocationEnabled) {
+                "Location services must be enabled before starting observation."
+            }
             promoteToForeground()
             repository.setRunState(ObservationRunState.RUNNING)
             lifecycle("SERVICE_STARTED")
@@ -148,9 +158,20 @@ class NetworkObservationService : Service() {
             ";screen=${if (interactive) "ON" else "OFF"};event=$event" +
             ";elapsed_ms=${SystemClock.elapsedRealtime()};write_permission=$writePermission"
         repository.record(ObservationEntry.now(
-            condition,
+            "$condition;stage=RAW",
             "${decision.mode};desired=${decision.desired};reason=${decision.reason};diagnostic_only",
         ))
+        // A one-shot quiet window is not polling. Cancel it on every relevant state change.
+        recommendationWindow.update(decision, SystemClock.elapsedRealtime())
+        settleJob?.cancel()
+        settleJob = scope.launch {
+            delay(RecommendationWindow.QUIET_MS)
+            val settled = recommendationWindow.takeReady(SystemClock.elapsedRealtime()) ?: return@launch
+            repository.record(ObservationEntry.now(
+                "$condition;stage=STABLE;settled_elapsed_ms=${SystemClock.elapsedRealtime()}",
+                "${settled.mode};desired=${settled.desired};reason=${settled.reason};diagnostic_only",
+            ))
+        }
     }
 
     private fun lifecycle(event: String, recommendation: String = "NONE") {
@@ -188,7 +209,7 @@ class NetworkObservationService : Service() {
             .addAction(Notification.Action.Builder(null, getString(R.string.observation_stop), stop).build())
             .build()
         if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
         } else startForeground(NOTIFICATION_ID, notification)
     }
 
@@ -199,6 +220,7 @@ class NetworkObservationService : Service() {
         if (providerObserved) contentResolver.unregisterContentObserver(providerObserver)
         repository.setRunState(ObservationRunState.STOPPED, failed)
         lifecycle("SERVICE_STOPPED")
+        repository.flushOnStop()
         super.onDestroy()
     }
 

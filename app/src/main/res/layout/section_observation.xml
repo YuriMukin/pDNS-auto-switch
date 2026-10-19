@@ -22,14 +22,17 @@
                 android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="8dp"
                 android:minHeight="52dp" android:textAllCaps="false" android:text="@string/observation_stop" android:enabled="false" />
         </LinearLayout>
-        <TextView android:id="@+id/observation_preview" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="12dp" android:maxLines="8"
-            android:ellipsize="end" android:fontFamily="monospace" android:textSize="12sp"
-            android:textColor="?attr/colorOnSurfaceVariant" android:text="@string/observation_empty" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/observation_view_log"
+        <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/observation_logging"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:text="@string/observation_logging" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/observation_save"
             style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:minHeight="48dp" android:textAllCaps="false"
-            android:text="@string/observation_view_log" />
+            android:text="@string/observation_save" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/observation_clear"
+            style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp" android:textAllCaps="false"
+            android:text="@string/observation_clear" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/observation_legend" android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:textColor="?attr/colorOnSurfaceVariant" />

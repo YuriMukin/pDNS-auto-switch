@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-/** Deliberately has no DNS write adapter. A recommendation can never apply a setting. */
+/** Event-driven observation and explicitly enabled, session-scoped Auto. */
 class NetworkObservationService : Service() {
     private val repository by lazy { ObservationRepository.get(this) }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -42,6 +42,9 @@ class NetworkObservationService : Service() {
     private var receiverRegistered = false
     private var providerObserved = false
     private var failed = false
+    private val auto = AutoRuntime.session
+    private val dns by lazy { DnsController(AndroidDnsSettings(this)) }
+    private var pauseJob: Job? = null
     private val recommendationWindow = RecommendationWindow()
     private var settleJob: Job? = null
 
@@ -56,7 +59,7 @@ class NetworkObservationService : Service() {
     )
 
     private val providerObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
-        override fun onChange(selfChange: Boolean) { reconcile("PROVIDER_CHANGED") }
+        override fun onChange(selfChange: Boolean) { reconcile("DNS_SETTINGS_CHANGED", auto.state.value.enabled) }
     }
     private val accessReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) { refresh("LOCATION_OR_SCREEN_CHANGED") }
@@ -77,10 +80,10 @@ class NetworkObservationService : Service() {
             monitor = NetworkMonitor(this) { reconcile(it) }
             refresh("SERVICE_SUBSCRIBED")
             if (failed) return
-            contentResolver.registerContentObserver(
-                Settings.Global.getUriFor("private_dns_specifier"), false, providerObserver,
-            )
             providerObserved = true
+            listOf(DnsController.MODE, DnsController.DEFAULT_MODE, DnsController.PROVIDER).forEach { key ->
+                contentResolver.registerContentObserver(Settings.Global.getUriFor(key), false, providerObserver)
+            }
             registerReceiver(accessReceiver, IntentFilter().apply {
                 addAction(LocationManager.MODE_CHANGED_ACTION)
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -98,6 +101,28 @@ class NetworkObservationService : Service() {
                 }
             }
             scope.launch {
+                var previous = AutoSession.State()
+                auto.state.collect { state ->
+                    if (state != previous) {
+                        lifecycle(when {
+                            !state.enabled -> "AUTO_DISABLED"
+                            state.pausedUntilMs != null -> "AUTO_PAUSED;duration_minutes=${auto.pauseMinutes}"
+                            previous.pausedUntilMs != null -> "AUTO_RESUMED"
+                            else -> "AUTO_ENABLED"
+                        })
+                        if (!failed) try { promoteToForeground() } catch (error: RuntimeException) { fail(error) }
+                        pauseJob?.cancel()
+                        if (state.pausedUntilMs != null) {
+                            pauseJob = scope.launch {
+                                delay((state.pausedUntilMs - SystemClock.elapsedRealtime()).coerceAtLeast(0))
+                                auto.resumeIfDue()
+                            }
+                        } else if (state.enabled) refresh("AUTO_READY")
+                        previous = state
+                    }
+                }
+            }
+            scope.launch {
                 ObservationPresence.foreground.drop(1).collect {
                     // Force fresh, permission-redacted capabilities instead of reusing foreground SSIDs.
                     refresh(if (it) "UI_FOREGROUND" else "UI_BACKGROUND")
@@ -109,7 +134,13 @@ class NetworkObservationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) stopSelf()
+        if (intent?.action == ACTION_STOP) {
+            auto.disable()
+            stopSelf()
+        } else if (intent?.action == ACTION_ENABLE_AUTO && !failed) {
+            auto.enable(dns)
+            if (!auto.state.value.enabled) lifecycle("AUTO_ENABLE_FAILED", auto.state.value.error.toString())
+        }
         return START_NOT_STICKY
     }
 
@@ -123,23 +154,26 @@ class NetworkObservationService : Service() {
         } catch (error: RuntimeException) { fail(error) }
     }
 
+    private fun canWriteDns() = checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS) ==
+        PackageManager.PERMISSION_GRANTED
+
     private fun providerState(): ProviderState = try {
         if (Settings.Global.getString(contentResolver, "private_dns_specifier").isNullOrBlank()) {
             ProviderState.MISSING
         } else ProviderState.CONFIGURED
-    } catch (_: SecurityException) { ProviderState.UNREADABLE }
+    } catch (_: RuntimeException) { ProviderState.UNREADABLE }
 
-    private fun reconcile(event: String) {
+    private fun reconcile(event: String, force: Boolean = false) {
         if (failed || !::monitor.isInitialized) return
+        if (auto.resumeIfDue()) return // State collector requests a fresh subscription.
         val snapshot = monitor.snapshot()
         val access = monitor.locationAccess()
         val provider = providerState()
         val visible = ObservationPresence.foreground.value
         val interactive = getSystemService(PowerManager::class.java).isInteractive
-        val writePermission = checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS) ==
-            PackageManager.PERMISSION_GRANTED
+        val writePermission = canWriteDns()
         val signature = Signature(snapshot, trusted, access, provider, visible, interactive, writePermission)
-        if (signature == lastSignature) return // Ignore repeated callbacks without relevant changes.
+        if (!force && signature == lastSignature) return // Ignore repeated callbacks without relevant changes.
         lastSignature = signature
         val decision = PolicyEvaluator.evaluate(snapshot, trusted, access, provider)
         val active = snapshot.active
@@ -171,6 +205,18 @@ class NetworkObservationService : Service() {
                 "$condition;stage=STABLE;settled_elapsed_ms=${SystemClock.elapsedRealtime()}",
                 "${settled.mode};desired=${settled.desired};reason=${settled.reason};diagnostic_only",
             ))
+            // Recheck access/provider/snapshot at application time, not only at callback time.
+            if (monitor.snapshot() != snapshot || monitor.locationAccess() != access ||
+                providerState() != provider || trusted != signature.trusted ||
+                canWriteDns() != writePermission) {
+                reconcile("PRE_APPLY_CHANGED", true)
+                return@launch
+            }
+            val result = auto.apply(settled, dns)
+            if (result != null) repository.record(ObservationEntry.now(
+                "AUTO_APPLY;desired=${settled.desired};actual=${dns.readState().mode}",
+                "result=$result;automatic_action",
+            ))
         }
     }
 
@@ -185,6 +231,7 @@ class NetworkObservationService : Service() {
     private fun fail(error: RuntimeException) {
         if (failed) return
         failed = true
+        auto.disable()
         lifecycle("SERVICE_ERROR_${error.javaClass.simpleName}", "BLOCKED")
         repository.setRunState(ObservationRunState.STOPPED, failed = true)
         stopSelf()
@@ -203,7 +250,11 @@ class NetworkObservationService : Service() {
         val notification = Notification.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_dns_tile)
             .setContentTitle(getString(R.string.observation_notification_title))
-            .setContentText(getString(R.string.observation_notification_body))
+            .setContentText(getString(when {
+                auto.state.value.pausedUntilMs != null -> R.string.auto_paused
+                auto.state.value.enabled -> R.string.auto_notification_body
+                else -> R.string.observation_notification_body
+            }))
             .setContentIntent(open).setOngoing(true).setOnlyAlertOnce(true)
             .setVisibility(Notification.VISIBILITY_PRIVATE)
             .addAction(Notification.Action.Builder(null, getString(R.string.observation_stop), stop).build())
@@ -214,6 +265,7 @@ class NetworkObservationService : Service() {
     }
 
     override fun onDestroy() {
+        auto.disable()
         scope.cancel()
         if (::monitor.isInitialized) monitor.stop()
         if (receiverRegistered) unregisterReceiver(accessReceiver)
@@ -225,6 +277,7 @@ class NetworkObservationService : Service() {
     }
 
     companion object {
+        const val ACTION_ENABLE_AUTO = "io.github.sorjo.pdnsautoswitch.ENABLE_AUTO"
         const val ACTION_STOP = "io.github.sorjo.pdnsautoswitch.STOP_OBSERVATION"
         private const val CHANNEL = "network_observation"
         private const val NOTIFICATION_ID = 40

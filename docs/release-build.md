@@ -36,7 +36,7 @@ $env:PDNS_SIGNING_PROPERTIES = Join-Path $env:USERPROFILE '.android/pdns-auto-sw
 .\gradlew.bat assembleRelease testDebugUnitTest lintRelease
 ```
 
-Результат: `app/build/release/pdns-auto-switch-0.3.3.apk`.
+Результат: `app/build/release/pdns-auto-switch-0.3.5.apk`.
 Имя имеет формат `pdns-auto-switch-<versionName>.apk`: версия берётся из конфигурации
 автоматически. Задача `exportReleaseApk` выполняется вместе с `assembleRelease` и копирует
 подписанный APK без изменения содержимого. Служебный `app-release.apk` остаётся в каталоге
@@ -47,9 +47,9 @@ Android Gradle Plugin; для распространения используй�
 
 ```powershell
 $toolsDir = Join-Path $env:LOCALAPPDATA 'Android/Sdk/build-tools/36.0.0'
-& "$toolsDir/apksigner.bat" verify --verbose --print-certs app/build/release/pdns-auto-switch-0.3.3.apk
-& "$toolsDir/zipalign.exe" -c -P 16 -v 4 app/build/release/pdns-auto-switch-0.3.3.apk
-Get-FileHash app/build/release/pdns-auto-switch-0.3.3.apk -Algorithm SHA256
+& "$toolsDir/apksigner.bat" verify --verbose --print-certs app/build/release/pdns-auto-switch-0.3.5.apk
+& "$toolsDir/zipalign.exe" -c -P 16 -v 4 app/build/release/pdns-auto-switch-0.3.5.apk
+Get-FileHash app/build/release/pdns-auto-switch-0.3.5.apk -Algorithm SHA256
 ```
 
 В `aapt dump badging` должны быть ожидаемые package/version/minSdk/targetSdk

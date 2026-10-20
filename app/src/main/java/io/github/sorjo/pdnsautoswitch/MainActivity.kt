@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         wifiSection = WifiSectionController(this)
         observationSection = ObservationSectionController(this)
         findViewById<Button>(R.id.toggle_dns).setOnClickListener {
+            AutoRuntime.session.pauseForManualChange()
             val message = when (controller.toggle()) {
                 DnsController.ToggleResult.SUCCESS -> null
                 DnsController.ToggleResult.MISSING_PERMISSION -> R.string.permission_help

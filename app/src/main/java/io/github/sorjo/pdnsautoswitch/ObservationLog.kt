@@ -24,7 +24,7 @@ data class ObservationEntry(val timestamp: String, val condition: String, val re
 }
 
 /** Single-writer bounded history: append normally, compact in batches to avoid repeated full rewrites. */
-class ObservationLog(private val file: File, private val capacity: Int = 50_000) {
+class ObservationLog(private val file: File, private val capacity: Int = 2500) {
     init { require(capacity > 0) }
     private var history: ArrayDeque<String>? = null
     private var normalized = false
@@ -32,11 +32,17 @@ class ObservationLog(private val file: File, private val capacity: Int = 50_000)
     fun read(): List<String> {
         if (history == null) {
             val loaded = ArrayDeque<String>()
+            var trimmed = false
             if (file.exists()) file.forEachLine { line ->
                 if (line.length <= 4096 && line.split(" - ").size == 3) {
-                    if (loaded.size == capacity) loaded.removeFirst()
+                    if (loaded.size == capacity) { loaded.removeFirst(); trimmed = true }
                     loaded.addLast(line)
                 }
+            }
+            if (trimmed) {
+                // Apply a smaller limit on load, even if no new network event is appended.
+                write(loaded.toList())
+                normalized = true
             }
             history = loaded
         }

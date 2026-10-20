@@ -23,6 +23,10 @@ hs_err_pid*
 # Signing credentials (the Gradle Wrapper JAR must stay tracked)
 *.jks
 *.keystore
+*.p12
+*.pfx
+*.key
+*.pem
 keystore.properties
 signing.properties
 .env

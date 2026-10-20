@@ -7,26 +7,38 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.widget.Toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class DnsTileService : TileService() {
     private val controller by lazy { DnsController(AndroidDnsSettings(this)) }
     private val observer by lazy { DnsSettingsObserver(this) { updateTile() } }
     private var listening = false
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var autoJob: Job? = null
 
     override fun onStartListening() {
         super.onStartListening()
         listening = true
         observer.start()
+        autoJob?.cancel()
+        autoJob = scope.launch { AutoRuntime.session.state.collect { updateTile() } }
         updateTile()
     }
 
     override fun onStopListening() {
         listening = false
+        autoJob?.cancel()
         observer.stop()
         super.onStopListening()
     }
 
     override fun onDestroy() {
+        scope.cancel()
         observer.stop()
         super.onDestroy()
     }
@@ -37,6 +49,7 @@ class DnsTileService : TileService() {
     }
 
     private fun toggleDns() {
+        AutoRuntime.session.pauseForManualChange()
         when (controller.toggle()) {
             DnsController.ToggleResult.SUCCESS -> Unit
             DnsController.ToggleResult.MISSING_PERMISSION,
@@ -69,6 +82,11 @@ class DnsTileService : TileService() {
             state.mode == DnsController.Mode.AUTOMATIC -> R.string.state_automatic
             else -> R.string.state_unknown
         })
+        val auto = AutoRuntime.session.state.value
+        if (auto.enabled) tile.subtitle = getString(
+            if (auto.pausedUntilMs != null) R.string.tile_auto_paused else R.string.tile_auto_active,
+            tile.subtitle,
+        )
         tile.contentDescription = getString(R.string.tile_description, tile.subtitle)
         tile.stateDescription = tile.subtitle
         tile.updateTile()

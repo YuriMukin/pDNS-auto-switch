@@ -1,10 +1,10 @@
 <resources>
     <string name="observation_title">Наблюдение за сетью</string>
-    <string name="observation_hint">Сервис следит за сетью, в том числе при закрытом приложении. DNS не меняется. Для чтения имён Wi-Fi нужна точная геопозиция и включённое местоположение.</string>
+    <string name="observation_hint">Сервис следит за сетью, в том числе при закрытом приложении. При выключенном Auto DNS не меняется. Для чтения имён Wi-Fi нужна точная геопозиция и включённое местоположение.</string>
     <string name="observation_start">Запустить</string>
     <string name="observation_stop">Остановить</string>
     <string name="observation_starting">Запускаем наблюдение…</string>
-    <string name="observation_running">Наблюдение работает · DNS не меняется</string>
+    <string name="observation_running">Наблюдение работает</string>
     <string name="observation_stopped">Наблюдение остановлено</string>
     <string name="observation_start_failed">Не удалось запустить наблюдение. Проверьте разрешение на точную геопозицию и включённое местоположение.</string>
     <string name="observation_logging">Записывать журнал</string>
@@ -18,8 +18,26 @@
     <string name="observation_permission_required">Для наблюдения предоставьте точную геопозицию в разрешениях приложения.</string>
     <string name="observation_permission_explanation">Android защищает имя Wi-Fi как данные о местоположении. Точная геопозиция нужна для чтения имени сети в работающем сервисе после закрытия экрана приложения. Координаты не запрашиваются и не сохраняются.</string>
     <string name="observation_location_required">Включите местоположение в Android, затем снова нажмите «Запустить».</string>
-    <string name="observation_legend">До 50 000 записей хранятся между запусками, без имён Wi-Fi. RAW — исходное событие, STABLE — рекомендация после 750 мс без изменений. DNS не переключается.</string>
+    <string name="observation_legend">До 2500 записей хранятся между запусками, без имён Wi-Fi. RAW — исходное событие, STABLE — рекомендация после 750 мс без изменений. Результаты Auto записываются отдельно.</string>
     <string name="observation_channel">Наблюдение за сетью</string>
     <string name="observation_notification_title">pDNS наблюдает за сетью</string>
     <string name="observation_notification_body">Чтение имени Wi-Fi. DNS не меняется.</string>
+    <string name="auto_title">Auto · переключать DNS по сети</string>
+    <string name="auto_pause_label">Пауза после ручного переключения</string>
+    <string name="auto_pause_minutes">%1$d мин</string>
+    <string name="auto_pause_helper">Для следующего ручного нажатия. Наблюдение во время паузы продолжается.</string>
+    <string name="auto_paused">Auto на паузе после ручного переключения</string>
+    <string name="auto_paused_until">Auto на паузе до %1$s</string>
+    <string name="tile_auto_paused">%1$s · Auto: пауза</string>
+    <string name="tile_auto_active">%1$s · Auto</string>
+    <string name="control_auto">Auto</string>
+    <string name="control_auto_paused">Auto · пауза</string>
+    <string name="auto_running">Auto включён</string>
+    <string name="auto_stopped">Auto выключен</string>
+    <string name="auto_hint">Доверенный Wi-Fi — DNS выключен, остальные сети — сохранённый провайдер. Кнопка DNS и плитка ставят Auto на паузу на выбранное время. Новое ручное нажатие начинает паузу заново; смена сети её не отменяет. Остановка сервиса завершает Auto; выключение Auto оставляет текущий DNS. После завершения процесса включите Auto снова.</string>
+    <string name="auto_permission_error">Auto выключен: нет разрешения изменять DNS. Завершите настройку и включите Auto снова.</string>
+    <string name="auto_provider_error">Auto выключен: укажите провайдера в настройках Android и включите Auto снова.</string>
+    <string name="auto_read_error">Auto выключен: не удалось прочитать настройки DNS.</string>
+    <string name="auto_write_error">Auto выключен: Android не подтвердил изменение DNS. Проверьте системные настройки.</string>
+    <string name="auto_notification_body">Auto управляет DNS по подключённой сети.</string>
 </resources>

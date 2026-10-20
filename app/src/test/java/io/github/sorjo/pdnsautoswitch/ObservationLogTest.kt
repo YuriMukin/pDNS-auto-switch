@@ -31,18 +31,19 @@ class ObservationLogTest {
         assertEquals(listOf("t1 - MOBILE - HOSTNAME"), ObservationLog(file).read())
     }
 
-    @Test fun `large default history survives restart and compacts only oldest batch`() {
+    @Test fun `legacy history is trimmed on load and compacts only the oldest tenth`() {
         val file = folder.root.resolve("large.log")
         file.bufferedWriter().use { writer ->
             for (number in 1..50_010) writer.append("t$number - WIFI - OFF\n")
         }
         val log = ObservationLog(file)
-        assertEquals(50_000, log.read().size)
-        assertTrue(log.read().first().startsWith("t11 - "))
+        assertEquals(2500, log.read().size)
+        assertEquals(2500, file.readLines().size)
+        assertTrue(log.read().first().startsWith("t47511 - "))
         log.append(ObservationEntry("t50011", "MOBILE", "HOSTNAME"))
         val restored = ObservationLog(file).read()
-        assertEquals(45_001, restored.size)
-        assertTrue(restored.first().startsWith("t5011 - "))
+        assertEquals(2251, restored.size)
+        assertTrue(restored.first().startsWith("t47761 - "))
         assertTrue(restored.last().startsWith("t50011 - "))
     }
 
@@ -54,5 +55,20 @@ class ObservationLogTest {
         log.append(ObservationEntry("t2", "MOBILE", "HOSTNAME"))
         log.append(ObservationEntry("t3", "MOBILE", "HOSTNAME"))
         assertEquals(listOf("t1", "t2", "t3"), ObservationLog(file).read().map { it.substringBefore(" - ") })
+    }
+
+
+    @Test fun `history at the limit stays intact until the next append`() {
+        val file = folder.root.resolve("full.log")
+        file.bufferedWriter().use { writer ->
+            for (number in 1..2500) writer.append("t$number - MOBILE - HOSTNAME\n")
+        }
+        val log = ObservationLog(file)
+        assertEquals(2500, log.read().size)
+        assertEquals("t1 - MOBILE - HOSTNAME", log.read().first())
+        log.append(ObservationEntry("t2501", "MOBILE", "HOSTNAME"))
+        assertEquals(2251, log.read().size)
+        assertEquals("t251 - MOBILE - HOSTNAME", log.read().first())
+        assertEquals(2251, file.readLines().size)
     }
 }

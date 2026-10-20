@@ -23,7 +23,7 @@ class DnsController(private val settings: DnsSettings) {
             provider = settings.read(PROVIDER).orEmpty().trim(),
             canWrite = settings.canWrite(),
         )
-    } catch (_: SecurityException) {
+    } catch (_: RuntimeException) {
         State(Mode.UNKNOWN, "", false, readable = false)
     }
 
@@ -31,16 +31,29 @@ class DnsController(private val settings: DnsSettings) {
         val state = readState()
         if (!state.readable) return ToggleResult.READ_FAILED
         if (!state.canWrite) return ToggleResult.MISSING_PERMISSION
-        val desired = if (state.mode == Mode.HOSTNAME) "off" else "hostname"
+        return applyMode(if (state.mode == Mode.HOSTNAME) Mode.OFF else Mode.HOSTNAME)
+    }
+
+    /** Idempotent application; the provider setting is never written. */
+    fun applyMode(mode: Mode): ToggleResult {
+        require(mode == Mode.OFF || mode == Mode.HOSTNAME)
+        val state = readState()
+        if (!state.readable) return ToggleResult.READ_FAILED
+        if (!state.canWrite) return ToggleResult.MISSING_PERMISSION
+        val desired = if (mode == Mode.OFF) "off" else "hostname"
         if (desired == "hostname" && state.provider.isBlank()) return ToggleResult.MISSING_PROVIDER
+        if (state.mode == mode) return ToggleResult.SUCCESS
         return try {
-            if (settings.write(MODE, desired) && settings.read(MODE) == desired) {
+            if (settings.write(MODE, desired) && settings.read(MODE) == desired &&
+                settings.read(PROVIDER).orEmpty().trim() == state.provider) {
                 ToggleResult.SUCCESS
             } else {
                 ToggleResult.WRITE_FAILED
             }
         } catch (_: SecurityException) {
             ToggleResult.MISSING_PERMISSION
+        } catch (_: RuntimeException) {
+            ToggleResult.WRITE_FAILED
         }
     }
 
